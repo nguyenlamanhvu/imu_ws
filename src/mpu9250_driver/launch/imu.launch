@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="model" default="$(find mpu9250_driver)/urdf/plane.urdf.xacro"/>
+  <arg name="gui" default="true" />
+  <arg name="use_mag" default="true"/>
+  <arg name="port" default="/dev/ttyUSB0"/>
+  <arg name="baud" default="115200"/>
+
+  <param name="robot_description" command="$(find xacro)/xacro --inorder $(find mpu9250_driver)/urdf/plane.urdf.xacro" />
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" >
+  </node>
+
+  <node pkg="rosserial_python" type="serial_node.py" name="serial_node">
+    <param name="port" value="$(arg port)"/>
+    <param name="baud" value="$(arg baud)"/>
+  </node>
+
+  <node name="imu_filter_node_for_orientation" pkg="imu_complementary_filter" type="complementary_filter_node" >
+    <param name="use_mag"     value="$(arg use_mag)"/>
+  </node>
+  
+  <node name="rpy_tf" pkg="mpu9250_driver" type="tf_broadcaster_imu.py" >
+  </node>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find mpu9250_driver)/config/rviz_config.rviz"/> 
+</launch>
